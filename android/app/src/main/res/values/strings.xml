@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LiamAI</string>
+    <string name="title_activity_main">LiamAI</string>
+    <string name="package_name">com.liamai.app</string>
+    <string name="custom_url_scheme">com.liamai.app</string>
+</resources>

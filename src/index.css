@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Libre Baskerville', ui-serif, Georgia, serif;
+
+  /* New Dark Premium Brand Colors */
+  --color-brand-dark: #040D1C;
+  --color-brand-dark-light: #0B192C; /* Slightly lighter for cards */
+  --color-brand-dark-border: #1E2D4A;
+  
+  --color-brand-green: #8B9D6E;
+  --color-brand-green-glow: #22C55E;
+  
+  --color-brand-text: #FFFFFF;
+  --color-brand-text-muted: #CBD5E1;
+
+  /* Legacy aliases to prevent immediate crashes, though we will phase them out */
+  --color-brand-warm: #040D1C;
+  --color-brand-sage: #8B9D6E;
+  --color-brand-sand: #0B192C;
+  --color-brand-clay: #22C55E;
+  --color-brand-gold: #22C55E;
+}
+
+body {
+  background-color: var(--color-brand-dark);
+  color: var(--color-brand-text);
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+.notranslate {
+  translate: no;
+}

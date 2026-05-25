@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR" translate="no" class="notranslate">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="google" content="notranslate" />
+    <title>Liam AI English</title>
+    <link rel="icon" href="/pwa-manifest-icon.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#040D1C">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="application-name" content="Liam AI English">
+    <meta name="apple-mobile-web-app-title" content="Liam AI">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="description" content="Seu professor de inglês com IA 24h por dia">
+    <!-- PWA primary color -->
+    <meta name="theme-color" content="#040D1C">
+    <meta name="msapplication-TileColor" content="#040D1C">
+    <script>
+      try {
+        // Clear Service Worker and caches immediately on development/preview environments to avoid white screens
+        if ('serviceWorker' in navigator && (window.location.hostname.includes('run.app') || window.location.hostname === 'localhost')) {
+          navigator.serviceWorker.getRegistrations().then(registrations => {
+            for (let registration of registrations) {
+              registration.unregister().then(() => {
+                console.log('SW unregistered successfully for dev domain.');
+              }).catch(e => console.warn('SW unregister fail:', e));
+            }
+          }).catch(e => console.warn('getRegistrations fail:', e));
+          if ('caches' in window) {
+            caches.keys().then(names => {
+              for (let name of names) {
+                caches.delete(name).then(() => {
+                  console.log('Cache cleared successfully:', name);
+                }).catch(e => console.warn('Cache delete fail:', e));
+              }
+            }).catch(e => console.warn('caches.keys fail:', e));
+          }
+        } else if ('serviceWorker' in navigator) {
+          // Only register Service Worker on production/installed domains
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').then(registration => {
+              console.log('SW registered: ', registration);
+            }).catch(registrationError => {
+              console.log('SW registration failed: ', registrationError);
+            });
+          });
+        }
+      } catch (err) {
+        console.warn('Service worker setup failed safely:', err);
+      }
+
+      try {
+        const originalFetch = window.fetch;
+        Object.defineProperty(window, 'fetch', {
+          configurable: true,
+          enumerable: true,
+          get: () => originalFetch,
+          set: () => {
+            console.warn('Blocked attempt to overwrite window.fetch');
+          }
+        });
+      } catch (err) {
+        console.warn('Could not define customizable window.fetch:', err);
+      }
+    </script>
+    <script type="module" crossorigin src="/assets/index-B10-7hOW.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Df8VuhDf.css">
+  </head>
+  <body class="notranslate">
+    <div id="root"></div>
+  </body>
+</html>
+
+

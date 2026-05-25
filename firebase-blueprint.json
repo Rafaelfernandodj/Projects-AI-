@@ -1,0 +1,79 @@
+{
+  "entities": {
+    "School": {
+      "title": "School",
+      "description": "A school that has students",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "createdAt": { "type": "integer" }
+      },
+      "required": ["name", "createdAt"]
+    },
+    "User": {
+      "title": "User",
+      "description": "A student using Liam",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "schoolId": { "type": "string" },
+        "schoolName": { "type": "string" },
+        "level": { "type": "string", "enum": ["Survivor", "Speaker", "Fluent", "Unassigned"] },
+        "points": { "type": "integer" },
+        "streak": { "type": "integer" },
+        "bestStreak": { "type": "integer" },
+        "lastActiveDate": { "type": "string" },
+        "goal": { "type": "string" },
+        "difficulties": { "type": "string" },
+        "confidence": { "type": "string" },
+        "textSessions": { "type": "integer" },
+        "liveSessions": { "type": "integer" },
+        "timeSpent": { "type": "integer" },
+        "createdAt": { "type": "integer" }
+      },
+      "required": ["userId", "email", "level", "points", "streak", "bestStreak", "textSessions", "liveSessions", "timeSpent", "createdAt"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Conversation message",
+      "type": "object",
+      "properties": {
+        "role": { "type": "string", "enum": ["user", "model", "system"] },
+        "content": { "type": "string" },
+        "timestamp": { "type": "integer" },
+        "sessionType": { "type": "string", "enum": ["text", "live"] }
+      },
+      "required": ["role", "content", "timestamp", "sessionType"]
+    },
+    "Medal": {
+      "title": "Medal",
+      "description": "Earned gamification badge",
+      "type": "object",
+      "properties": {
+        "medalId": { "type": "string" },
+        "earnedAt": { "type": "integer" }
+      },
+      "required": ["medalId", "earnedAt"]
+    }
+  },
+  "firestore": {
+    "/schools/{schoolId}": {
+      "schema": { "$ref": "#/entities/School" },
+      "description": "Schools available for users to join"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Student profiles and metrics"
+    },
+    "/users/{userId}/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/Message" },
+      "description": "History of conversations for a user"
+    },
+    "/users/{userId}/medals/{medalId}": {
+      "schema": { "$ref": "#/entities/Medal" },
+      "description": "Medals earned by a user"
+    }
+  }
+}

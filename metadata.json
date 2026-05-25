@@ -1,0 +1,10 @@
+{
+  "name": "Liam Web App",
+  "description": "Educational SaaS web app focused on teaching English with AI",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

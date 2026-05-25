@@ -1,0 +1,24 @@
+import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'com.liamai.app',
+  appName: 'Liam AI',
+  webDir: 'dist',
+  plugins: {
+    SplashScreen: {
+      launchShowDuration: 2000,
+      launchAutoHide: true,
+      backgroundColor: "#040D1C",
+      androidSplashResourceName: "splash",
+      androidScaleType: "CENTER_CROP",
+      showSpinner: true,
+      androidSpinnerStyle: "large",
+      iosSpinnerStyle: "small",
+      spinnerColor: "#22C55E",
+      splashFullScreen: true,
+      splashImmersive: true,
+    },
+  },
+};
+
+export default config;
