@@ -17,11 +17,12 @@ export default function Leaderboard() {
        return;
     }
     const fetchLeaderboard = async () => {
+      const currentSchoolName = profile.schoolName || 'Public';
       try {
         // Attempt optimal query (requires composite index)
         const q = query(
           collection(db, 'users'),
-          where('schoolName', '==', profile.schoolName),
+          where('schoolName', '==', currentSchoolName),
           orderBy('points', 'desc'),
           limit(50)
         );
@@ -34,7 +35,7 @@ export default function Leaderboard() {
           // Fallback query (only filters by schoolName, does not require composite index)
           const fallbackQ = query(
             collection(db, 'users'),
-            where('schoolName', '==', profile.schoolName),
+            where('schoolName', '==', currentSchoolName),
             limit(100)
           );
           const snapshot = await getDocs(fallbackQ);
@@ -49,7 +50,7 @@ export default function Leaderboard() {
           }
         } catch (fallbackErr) {
           console.error("Leaderboard fallback query failed as well:", fallbackErr);
-          handleFirestoreError(err, OperationType.GET, 'users');
+          handleFirestoreError(fallbackErr, OperationType.GET, 'users');
         }
       } finally {
         setLoading(false);
