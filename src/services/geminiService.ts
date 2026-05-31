@@ -116,20 +116,22 @@ Ao corrigir gramática ou pronúncia:
 `;
   }
 
-  return `You are LIAM, a strict, pedagogical, yet highly motivating English Boss Native to California (25 years old).
-You are confident and a real guide to the student. You do not let them get away with poor English.
+  return `You are Liam AI, an ultra-fast, high-engagement conversational English coach for language schools. You act as a charismatic, highly effective, and slightly sarcastic ("Chic Amigável") coach. Keep motivation high but never tolerate lazy grammar.
 
-Never use action asterisks like *smiles* in text or talk, keep it pure dialogue and instructions.
+[PEDAGOGICAL & STYLE RULES]
+- Speak in English at all times. NEVER speak in Portuguese unless the student is explicitly classified as "Survivor" and indicates they are stuck or didn't understand.
+- Never use action asterisks like *smiles* or *laughs*. Keep it pure dialogue.
 
-STUDENT MEMORY:
+[COMPUTATIONAL & TOKEN OPTIMIZATION RULES]
+1. OUTPUT QUANTIZATION: Your responses MUST be concise. Limit every conversational turn to a MAXIMUM of 2 sentences or 25 words. Long sentences increase latency and API token costs. Be sharp, brief, and immediate.
+2. ASYNCHRONOUS CORRECTIONS: Do not create separate evaluation paragraphs. Seamlessly correct errors within your reply, highlighted between single asterisks (e.g. "So you *went* to the movies?"), and immediately move the conversation forward with a direct question.
+3. STRUCTURE: Your reply must always follow this strict token-saving structure: "Acknowledge/Correction + Contextual follow-up question."
+
+STUDENT CONTEXT HEADER (Supplied by APP):
 Student Name: ${profile.fullName || profile.displayName || "Friend"} (Prefers to be called: ${profile.displayName})
-Age/Group: ${profile.age || "Unknown"}
-English Study Time: ${profile.studyTime || "Unknown"}
-Self-Perceived Level: ${profile.perceivedLevel || "Unknown"}
-AI Assigned Level: ${profile.level}
-Goal: ${profile.goal || "General Practice"}
-Shame/Confidence to speak: ${profile.shameLevel || profile.confidence || "Medium"}
-Main Difficulties: ${profile.difficulties}${savedErrorsStr}
+Current Level: ${profile.level} (Survivor / Speaker / Fluent)
+Saved Errors Focus: ${savedErrorsStr || "None yet. Keep an eye out for patterns."}
+Main Difficulties: ${profile.difficulties || "General speaking"}
 
 ${modeRules}
 
@@ -164,7 +166,7 @@ export const chatWithLiamMultimodal = async (
   }
 
   const response = await ai.models.generateContent({
-    model: "gemini-3.1-pro-preview",
+    model: "gemini-3.5-flash",
     contents: contents,
     config: {
       systemInstruction: getSystemInstruction(profile),
@@ -178,7 +180,7 @@ export const chatWithLiamMultimodal = async (
 export const transcribeAudio = async (base64Data: string, mimeType: string) => {
   const currentAi = getAiInstance();
   const response = await currentAi.models.generateContent({
-    model: "gemini-3-flash-preview",
+    model: "gemini-3.5-flash",
     contents: [
       {
         parts: [
@@ -200,7 +202,7 @@ export const chatWithLiam = async (
 ) => {
   const currentAi = getAiInstance();
   const chat = currentAi.chats.create({
-    model: "gemini-3.1-pro-preview",
+    model: "gemini-3.5-flash",
     config: {
       systemInstruction: getSystemInstruction(profile),
       temperature: 0.7,
@@ -223,7 +225,7 @@ export const generateLiamResponseWithHistory = async (
   }));
 
   const chat = currentAi.chats.create({
-    model: "gemini-3.1-pro-preview",
+    model: "gemini-3.5-flash",
     config: {
       systemInstruction: getSystemInstruction(profile),
       temperature: 0.7,
@@ -246,7 +248,7 @@ export const evaluateOnboarding = async (
 }> => {
   const currentAi = getAiInstance();
   const response = await currentAi.models.generateContent({
-    model: "gemini-3.1-pro-preview",
+    model: "gemini-3.5-flash",
     contents: `Analyze the following onboarding answers from a student: \n\n${answers}\n\nBased on their answers and English responses, determine:
         1. Their level (Survivor, Speaker, Fluent)
            - Survivor: Basic, lots of Portuguese, short broken English.

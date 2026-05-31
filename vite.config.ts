@@ -11,45 +11,49 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss(),
       VitePWA({
-        registerType: 'autoUpdate',
-        includeAssets: ['icons/icon-192.png', 'icons/icon-512.png', 'pwa-manifest-icon.svg'],
+        registerType: "autoUpdate",
+        injectRegister: "inline",
+        devOptions: {
+          enabled: false
+        },
+        includeAssets: ["pwa-manifest-icon.svg", "pwa-192x192.png", "pwa-512x512.png", "maskable-icon-512x512.png"],
         manifest: {
-          name: 'Liam AI English',
-          short_name: 'Liam AI',
-          description: 'Seu professor de inglês com IA 24h por dia',
-          theme_color: '#040D1C',
-          background_color: '#040D1C',
-          display: 'standalone',
+          name: "Liam",
+          short_name: "Liam",
+          description: "Professor de inglês com IA",
+          theme_color: "#040D1C",
+          background_color: "#040D1C",
+          display: "standalone",
+          orientation: "portrait",
+          start_url: "/",
+          scope: "/",
           icons: [
             {
-              src: 'icons/icon-192.png',
-              sizes: '192x192',
-              type: 'image/png'
+              src: "/pwa-192x192.png",
+              sizes: "192x192",
+              type: "image/png"
             },
             {
-              src: 'icons/icon-512.png',
-              sizes: '512x512',
-              type: 'image/png'
+              src: "/pwa-512x512.png",
+              sizes: "512x512",
+              type: "image/png"
+            },
+            {
+              src: "/maskable-icon-512x512.png",
+              sizes: "512x512",
+              type: "image/png",
+              purpose: "any maskable"
             }
           ]
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-          navigateFallback: null,
+          inlineWorkboxRuntime: true,
+          globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
+          navigateFallbackDenylist: [/^\/api/, /firebase/],
           runtimeCaching: [
             {
-              urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*/i,
-              handler: 'NetworkOnly',
-              options: {
-                cacheName: 'firebase-cache',
-              },
-            },
-            {
-              urlPattern: /^https:\/\/generativelanguage\.googleapis\.com\/.*/i,
-              handler: 'NetworkOnly',
-              options: {
-                cacheName: 'gemini-cache',
-              },
+              urlPattern: /^\/api\/.*/i,
+              handler: "NetworkOnly"
             }
           ]
         }
@@ -69,8 +73,6 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== "true",
     },
   };

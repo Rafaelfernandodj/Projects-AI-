@@ -25,7 +25,7 @@ export const chatWithLiamMultimodal = async (
   }
 
   const response = await currentAi.models.generateContent({
-    model: "gemini-3.1-pro-preview",
+    model: "gemini-3.5-flash",
     contents: contents,
     config: {
       systemInstruction: getSystemInstruction(profile),
