@@ -2,39 +2,33 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
+    // Allow Anyone to read/write for custom simple email session flow during MVP
     match /users/{userId} {
-      allow get, list: if request.auth != null;
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && request.auth.uid == userId;
+      allow read, write, create, update: if true;
     }
 
-    match /users/{userId}/messages/{messageId} {
-      allow read, create, update: if isOwner(userId);
-    }
-    
-    match /users/{userId}/chat_messages/{messageId} {
-      allow read, create, update, delete: if isOwner(userId);
+    match /users/{userId}/{allPaths=**} {
+      allow read, write, create, update, delete: if true;
     }
 
-    match /users/{userId}/chat_sessions/{sessionId} {
-      allow read, create, update: if isOwner(userId);
+    match /profiles/{profileId} {
+      allow read, write, create, update: if true;
     }
-    
-    match /users/{userId}/medals/{medalId} {
-      allow read, create: if isOwner(userId);
+
+    match /profiles/{profileId}/{allPaths=**} {
+      allow read, write, create, update, delete: if true;
+    }
+
+    match /manualAccess/{accessId} {
+      allow read, write, create, update: if true;
+    }
+
+    match /manualAccess/{accessId}/{allPaths=**} {
+      allow read, write, create, update, delete: if true;
     }
 
     match /schools/{schoolId} {
-      allow read: if isSignedIn();
-      allow create, update: if isSignedIn();
+      allow read, write: if true;
     }
   }
 }

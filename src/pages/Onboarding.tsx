@@ -79,26 +79,24 @@ export default function Onboarding() {
       `;
 
       try {
-        console.log("[Onboarding] Waiting for authStateReady...");
-        await auth.authStateReady();
-        console.log("[Onboarding] authStateReady resolved.");
-
         let currentUser = auth.currentUser;
         if (!currentUser && user) {
           currentUser = user as any;
         }
 
-        console.log("[Onboarding] Identified currentUser:", currentUser ? currentUser.uid : 'null');
+        console.log("[Onboarding] Identified currentUser:", currentUser ? (currentUser.uid || currentUser.email) : 'null');
 
-        if (currentUser) {
+        if (!currentUser) {
+            throw new Error("unauthenticated");
+        }
+
+        if (currentUser && typeof currentUser.reload === "function") {
             try {
                 await currentUser.reload();
                 console.log("[Onboarding] currentUser reloaded successfully.");
             } catch (authErr) {
                 console.warn("[Onboarding] Could not reload auth user:", authErr);
             }
-        } else {
-            throw new Error("unauthenticated");
         }
 
         let evaluation: any = {};
@@ -116,9 +114,14 @@ export default function Onboarding() {
             };
         }
         
-        console.log(`[Onboarding] Instantiating user doc ref for users/${currentUser.uid}`);
-        const userDocRef = doc(db, 'users', currentUser.uid);
-        let existingProfile = {};
+        const normalizedEmail = (currentUser.email || currentUser.uid || '').trim().toLowerCase();
+        if (!normalizedEmail) {
+            throw new Error("unauthenticated");
+        }
+
+        console.log(`[Onboarding] Instantiating user doc ref for users/${normalizedEmail}`);
+        const userDocRef = doc(db, 'users', normalizedEmail);
+        let existingProfile: any = {};
         
         try {
             console.log("[Onboarding] Attempting to read existing profile...");
@@ -128,7 +131,7 @@ export default function Onboarding() {
             
             if (userDocSnap && userDocSnap.exists && userDocSnap.exists()) {
                 existingProfile = userDocSnap.data();
-                console.log("[Onboarding] Existing profile found.");
+                console.log("[Onboarding] Existing profile found:", existingProfile);
             } else {
                 console.log("[Onboarding] No existing profile found (or timeout).");
             }
@@ -136,40 +139,63 @@ export default function Onboarding() {
             console.warn("[Onboarding] Could not read previous profile, continuing with empty:", readErr);
         }
 
-        const newProfile: UserProfile = {
-          ...existingProfile,
-          userId: currentUser.uid,
-          email: currentUser.email || (existingProfile as any).email || '',
-          displayName: answers.displayName || (existingProfile as any).displayName || 'Stud',
-          fullName: answers.fullName || (existingProfile as any).displayName,
-          age: answers.age,
-          schoolId: 'global',
-          schoolName: answers.schoolName || 'Public',
-          studyTime: answers.studyTime,
-          perceivedLevel: answers.perceivedLevel,
-          shameLevel: answers.shameLevel,
-          englishUnderstanding: answers.englishUnderstanding,
-          preferredSituation: answers.preferredSituation,
-          learningPreference: answers.learningPreference,
-          languageProportion: answers.languageProportion,
-          practicalCheckAnswers: answers.practicalCheckAnswers,
-          level: evaluation.level || 'Survivor',
-          goal: evaluation.goal || answers.goal || 'General',
-          difficulties: evaluation.difficulties || answers.difficulties || 'Speaking',
-          confidence: evaluation.confidence || answers.shameLevel || 'Medium',
-          points: (existingProfile as any).points || 10,
-          streak: (existingProfile as any).streak || 1,
-          bestStreak: (existingProfile as any).bestStreak || 1,
-          lastActiveDate: new Date().toISOString(),
-          textSessions: (existingProfile as any).textSessions || 0,
-          liveSessions: (existingProfile as any).liveSessions || 0,
-          timeSpent: (existingProfile as any).timeSpent || 0,
-          createdAt: (existingProfile as any).createdAt || Date.now()
+        const safeUserData = {
+          email: normalizedEmail || "",
+          fullName: answers.fullName || existingProfile?.fullName || answers.displayName || existingProfile?.displayName || "",
+          name: answers.displayName || existingProfile?.name || existingProfile?.displayName || "",
+          accessStatus: existingProfile?.accessStatus || "active",
+          role: existingProfile?.role || "student",
+          source: existingProfile?.source || "email_session",
+          plan: existingProfile?.plan || "manual_or_cakto",
+          onboardingCompleted: true,
+          level: evaluation?.level || "",
+          difficulties: evaluation?.difficulties || answers.difficulties || "",
+          confidence: evaluation?.confidence || answers.shameLevel || "",
+          goal: evaluation?.goal || answers.goal || "",
+          updatedAt: new Date().toISOString(),
+
+          // Preserve old data
+          displayName: answers.displayName || existingProfile?.displayName || "Student",
+          age: answers.age || existingProfile?.age || "",
+          schoolId: existingProfile?.schoolId || 'global',
+          schoolName: answers.schoolName || existingProfile?.schoolName || 'Public',
+          studyTime: answers.studyTime || existingProfile?.studyTime || '',
+          perceivedLevel: answers.perceivedLevel || existingProfile?.perceivedLevel || '',
+          shameLevel: answers.shameLevel || existingProfile?.shameLevel || '',
+          englishUnderstanding: answers.englishUnderstanding || existingProfile?.englishUnderstanding || '',
+          preferredSituation: answers.preferredSituation || existingProfile?.preferredSituation || '',
+          learningPreference: answers.learningPreference || existingProfile?.learningPreference || '',
+          languageProportion: answers.languageProportion || existingProfile?.languageProportion || '',
+          practicalCheckAnswers: answers.practicalCheckAnswers || existingProfile?.practicalCheckAnswers || {},
+          
+          points: existingProfile?.points !== undefined ? existingProfile.points : 10,
+          streak: existingProfile?.streak !== undefined ? existingProfile.streak : 1,
+          bestStreak: existingProfile?.bestStreak !== undefined ? existingProfile.bestStreak : 1,
+          textSessions: existingProfile?.textSessions !== undefined ? existingProfile.textSessions : 0,
+          liveSessions: existingProfile?.liveSessions !== undefined ? existingProfile.liveSessions : 0,
+          timeSpent: existingProfile?.timeSpent !== undefined ? existingProfile.timeSpent : 0,
+          createdAt: existingProfile?.createdAt || Date.now(),
+          lastActiveDate: new Date().toISOString()
         };
 
+        // Remove any fields with undefined value (and sanitize sub-objects)
+        Object.keys(safeUserData).forEach((key) => {
+          if ((safeUserData as any)[key] === undefined) {
+             delete (safeUserData as any)[key];
+          }
+        });
+
+        if (safeUserData.practicalCheckAnswers) {
+          Object.keys(safeUserData.practicalCheckAnswers).forEach((key) => {
+            if ((safeUserData.practicalCheckAnswers as any)[key] === undefined) {
+              delete (safeUserData.practicalCheckAnswers as any)[key];
+            }
+          });
+        }
+
         try {
-            console.log("[Onboarding] Calling setDoc on users/" + currentUser.uid);
-            const savePromise = setDoc(userDocRef, newProfile, { merge: true });
+            console.log("[Onboarding] Calling setDoc with merge true on users/" + normalizedEmail);
+            const savePromise = setDoc(userDocRef, safeUserData, { merge: true });
             const saveTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
             await Promise.race([savePromise, saveTimeout]);
             console.log("[Onboarding] setDoc completed successfully.");
@@ -177,7 +203,7 @@ export default function Onboarding() {
             console.error(`[Onboarding] setDoc failed - ErrorCode: ${saveErr.code}, Message: ${saveErr.message}`);
             if (saveErr.message === 'timeout' || saveErr.code === 'unavailable') {
                 console.warn("[Onboarding] Saving offline or timed out, will sync later. Saving to local state.");
-                localStorage.setItem('pendingProfileSetup', JSON.stringify(newProfile));
+                localStorage.setItem('pendingProfileSetup', JSON.stringify(safeUserData));
             } else {
                 throw saveErr; // Rethrow actual permission or format errors
             }
@@ -186,7 +212,7 @@ export default function Onboarding() {
         setStep(7); // Show success
         
         setTimeout(() => {
-            setProfile(newProfile);
+            setProfile(safeUserData as any);
             navigate('/');
         }, 3000);
 

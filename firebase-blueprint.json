@@ -56,6 +56,46 @@
         "earnedAt": { "type": "integer" }
       },
       "required": ["medalId", "earnedAt"]
+    },
+    "LiveSession": {
+      "title": "LiveSession",
+      "description": "Record of a Live Mode voice session",
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "startedAt": { "type": "integer" },
+        "endedAt": { "type": "integer" },
+        "status": { "type": "string", "enum": ["active", "completed"] },
+        "transcript": { "type": "array" },
+        "learnedPhrases": { "type": "array" },
+        "mistakes": { "type": "array" },
+        "corrections": { "type": "array" },
+        "topics": { "type": "array" },
+        "summary": { "type": "string" },
+        "nextRecommendedStep": { "type": "string" }
+      },
+      "required": ["sessionId", "userId", "userEmail", "startedAt", "status"]
+    },
+    "LiveLearningMemory": {
+      "title": "LiveLearningMemory",
+      "description": "Aggregated learning stats and memory of Liam's Live Mode sessions for a user",
+      "type": "object",
+      "properties": {
+        "lastUpdatedAt": { "type": "integer" },
+        "totalLiveSessions": { "type": "integer" },
+        "lastSessionAt": { "type": "integer" },
+        "currentLevelEstimate": { "type": "string" },
+        "mainDifficulties": { "type": "array" },
+        "learnedPhrases": { "type": "array" },
+        "recurringMistakes": { "type": "array" },
+        "strengths": { "type": "array" },
+        "preferredLanguageSupport": { "type": "string" },
+        "conversationSummary": { "type": "string" },
+        "nextRecommendedStep": { "type": "string" }
+      },
+      "required": ["lastUpdatedAt", "totalLiveSessions", "learnedPhrases"]
     }
   },
   "firestore": {
@@ -74,6 +114,14 @@
     "/users/{userId}/medals/{medalId}": {
       "schema": { "$ref": "#/entities/Medal" },
       "description": "Medals earned by a user"
+    },
+    "/users/{userId}/liveSessions/{sessionId}": {
+      "schema": { "$ref": "#/entities/LiveSession" },
+      "description": "Live sessions for a user"
+    },
+    "/users/{userId}/memory/{memoryId}": {
+      "schema": { "$ref": "#/entities/LiveLearningMemory" },
+      "description": "Learning memory status for a user"
     }
   }
 }

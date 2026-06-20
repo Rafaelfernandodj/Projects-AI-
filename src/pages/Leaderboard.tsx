@@ -59,6 +59,16 @@ export default function Leaderboard() {
     fetchLeaderboard();
   }, [profile]);
 
+  const getLeaderboardKey = (user: any, index: number) => {
+    return `${user?.userId || user?.email || user?.id || user?.uid || "student"}-${index}`;
+  };
+
+  const uniqueLeaders = leaders.filter((user: any, index, array) => {
+    const key = user?.userId || user?.email || user?.id || user?.uid;
+    if (!key) return true;
+    return array.findIndex((u: any) => (u?.userId || u?.email || u?.id || u?.uid) === key) === index;
+  });
+
   if (!profile) return null;
 
   return (
@@ -98,11 +108,11 @@ export default function Leaderboard() {
         <>
           {/* Mobile View: Cards */}
           <div className="md:hidden space-y-3">
-            {leaders.map((student, idx) => {
+            {uniqueLeaders.map((student, idx) => {
               const isCurrentUser = student.userId === profile.userId;
               return (
                 <div 
-                  key={student.userId} 
+                  key={getLeaderboardKey(student, idx)} 
                   className={`flex items-center justify-between p-4 rounded-2xl border ${
                     isCurrentUser 
                       ? 'bg-brand-green/10 border-brand-green/30' 
@@ -160,11 +170,11 @@ export default function Leaderboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-brand-dark-border">
-                  {leaders.map((student, idx) => {
+                  {uniqueLeaders.map((student, idx) => {
                     const isCurrentUser = student.userId === profile.userId;
                     return (
                       <tr 
-                        key={student.userId} 
+                        key={getLeaderboardKey(student, idx)} 
                         className={`transition-colors hover:bg-brand-dark ${
                           isCurrentUser ? 'bg-brand-green/10' : ''
                         }`}

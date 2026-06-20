@@ -220,7 +220,15 @@ export default function Profile() {
       </div>
 
       <button
-         onClick={() => signOut(auth)}
+         onClick={async () => {
+           localStorage.removeItem('liam_user_session');
+           try {
+             await signOut(auth);
+           } catch (e) {
+             console.warn("Error signing out from Firebase Auth:", e);
+           }
+           window.location.reload();
+         }}
          className="w-full flex items-center justify-center space-x-3 px-4 py-4 text-red-500 bg-red-500/10 border border-red-500/20 font-bold rounded-2xl hover:bg-red-500/20 transition-colors mt-8"
       >
          <LogOut size={20} />
