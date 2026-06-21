@@ -1,6 +1,6 @@
 ---
 name: liam-product-specialist
-description: Especialista de produto para garantir a segurança das regras didáticas, PCM, fluxo de áudio e banco de dados do LIAM.
+description: Especialista de produto para garantir a segurança das regras didáticas, PCM, fluxo de áudio, banco de dados e gerenciamento de memória do LIAM.
 ---
 
 # Skill de Especialista de Produto: LIAM
@@ -43,7 +43,18 @@ Qualquer modificação que impacte o agente conversacional LIAM deve seguir as s
 
 ---
 
-## 4. Fluxo de Trabalho (Segurança e Testes)
+## 4. Regras para o Gerenciamento de Memória Pedagógica
+
+Ao estender o sistema para gerenciar o progresso e memória do aluno, o agente deve seguir rigorosamente:
+1. **Não salvar áudio PCM ou strings base64:** Qualquer dado binário de gravação de áudio deve ser limpo e ignorado. Apenas o texto transcrito limpo pode ser armazenado.
+2. **Não salvar objetos brutos ou metadados de API da IA:** Gravar apenas textos estruturados, erros, correções e metas didáticas.
+3. **Uso de Memória Consolidada no Prompt:** Nunca buscar nem enviar todo o histórico de conversas/sessões do aluno para o prompt da IA. Use unicamente o documento consolidado `liveLearningMemory` para evitar estouro de tokens, latência de inicialização e custos desnecessários.
+4. **Acúmulo não-obstrutivo:** Em `LiveMode.tsx`, as transcrições do diálogo e erros devem ser acumulados usando referências React (`useRef`) em vez de estados locais (`useState`) para prevenir re-renderizações que degradam a performance do áudio PCM.
+5. **Gravação assíncrona pós-aula:** A compilação e envio dos registros da sessão e atualização da memória consolidada devem ocorrer de forma assíncrona após o encerramento intencional da aula.
+
+---
+
+## 5. Fluxo de Trabalho (Segurança e Testes)
 
 * **Planejamento Prévio:** Qualquer edição em arquivos que não sejam simples documentações exige a criação prévia de um plano de implementação.
 * **Verificação Pós-Edição:**

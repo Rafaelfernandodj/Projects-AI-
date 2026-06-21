@@ -54,11 +54,43 @@ O **Live Mode** é a funcionalidade mais crítica do produto (conversa contínua
 
 ---
 
-## 5. Memória Pedagógica e Integração do Perfil
-* **Zustand Store:** Gerencia o estado reativo do aluno (dados de perfil, streak, pontos, nível).
-* **Coleção Firestore (`/users`):** Sincroniza dados persistentes. O perfil do aluno alimenta dinamicamente a geração da `systemInstruction` da IA.
-* **Histórico de Conversas:** Salva o contexto das interações anteriores na subcoleção `/users/{userId}/messages` para que o LIAM lembre o que o aluno já praticou e consiga manter o encadeamento pedagógico.
-* **Pontuações e Gamificação:** O aluno acumula pontos ao participar de sessões de texto e live, atualizando streaks (dias consecutivos) para motivar a constância.
+## 5. Memória Pedagógica e Estrutura de Dados
+Para possibilitar o aprendizado continuado, o LIAM utiliza uma estrutura em duas camadas no Firestore:
+
+### A) Histórico Detalhado de Sessões (`/users/{userId}/liveSessions/{sessionId}`)
+Registrado localmente de forma não-obstrutiva e salvo ao final de cada aula para auditoria e histórico de progresso.
+* **Campos:**
+  * `sessionId`, `userId`: Identificadores únicos.
+  * `startedAt`, `endedAt`, `durationSeconds`: Timestamps e duração da sessão.
+  * `status`: Status da sessão (`completed`, `disconnected`, `failed`).
+  * `topicPracticed`: Tópico ou assunto que foi abordado na aula.
+  * `dialogueSnippet`: Array contendo transcrições de texto limpo das falas do aluno (`user`) e da IA (`model`).
+  * `learnedPhrases`: Frases em inglês aprendidas/praticadas.
+  * `errorsDetected`: Array de objetos `{ category, description }` com os desvios de gramática, vocabulário ou pronúncia detectados.
+  * `corrections`: Explicações ou correções textuais fornecidas.
+  * `sessionSummary`: Resumo textual didático da sessão produzido em background.
+  * `nextStep`: Orientação pedagógica específica para a próxima sessão.
+  * `createdAt`, `updatedAt`: Timestamps de criação e modificação.
+
+### B) Memória Consolidada de Longo Prazo (`/users/{userId}/memory/liveLearningMemory`)
+Documento fixo atualizado em background após cada sessão e pré-carregado no store global para entrar nas instruções do sistema (`systemInstruction`) do Gemini sem causar lentidão ou estouro de tokens.
+* **Campos:**
+  * `lastUpdated`: Timestamp da última sincronização.
+  * `totalLiveSessions`: Total acumulado de sessões de voz.
+  * `generalSummary`: Análise evolutiva condensada da fluência do aluno.
+  * `currentLevelEstimate`: Estimativa de nível atualizado (`Survivor`, `Speaker`, `Fluent`).
+  * `preferredLanguageSupport`: Preferência de nível de português suporte.
+  * `recurringErrors`: Array contendo `{ category, description, lastSeen }` dos erros recorrentes ativos.
+  * `topicsMastered`, `learnedPhrases`, `pronunciationFocus`: Tópicos dominados e pontos que necessitam de treino em pronúncia.
+  * `nextPedagogicalMilestone`: Próximo marco didático (ex: aprender tempos verbais futuros).
+  * `nextRecommendedStep`: Próximo passo recomendado de interação.
+
+> [!WARNING]
+> **REGRAS DE ARMAZENAMENTO SEGURO:**
+> * **NÃO salvar áudio PCM** ou dados binários de gravação no banco de dados.
+> * **NÃO salvar strings base64** de áudio recebidas ou enviadas.
+> * **NÃO salvar objetos brutos ou metadados de API da IA** diretamente sem limpeza.
+> * A memória consolidada deve ser mantida curta e concisa para servir como contexto no prompt.
 
 ---
 
