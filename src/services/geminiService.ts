@@ -1,6 +1,25 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { UserProfile } from "../store/useStore";
 
+/**
+ * Consolidated pedagogical memory loaded from Firestore.
+ * Used to inject long-term learning context into the system prompt.
+ * Fields must contain only clean text — never audio, base64 or raw API objects.
+ */
+export interface LiveLearningMemory {
+  lastUpdated: number;
+  totalLiveSessions: number;
+  generalSummary: string;
+  currentLevelEstimate: 'Survivor' | 'Speaker' | 'Fluent' | 'Unassigned';
+  preferredLanguageSupport?: string;
+  recurringErrors?: { category: string; description: string; lastSeen: number }[];
+  topicsMastered?: string[];
+  learnedPhrases?: string[];
+  pronunciationFocus?: string[];
+  nextPedagogicalMilestone?: string;
+  nextRecommendedStep?: string;
+}
+
 export function getAiInstance() {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -19,6 +38,7 @@ export const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "dummy
 export const getSystemInstruction = (
   profile?: UserProfile,
   isLive?: boolean,
+  memory?: LiveLearningMemory,
 ) => {
   if (!profile) {
     return "You are LIAM, an English Buddy native to California. Speak in English but keep it simple.";
@@ -146,8 +166,56 @@ Use e abuse destas frases quando ele errar:
 - "We only move on after you say it correctly. Let's go:"
 - "Say this sentence exactly: ..."
 - "Not quite natural. Instead of 'X', say 'Y'. Repeat after me:"
-- "Try again in English."`;
+- "Try again in English."
+
+${memory ? buildMemoryPromptBlock(memory) : ''}`;
 };
+
+/**
+ * Builds a concise memory block to append to the system prompt.
+ * Kept short to avoid token bloat — only clean text summaries.
+ */
+function buildMemoryPromptBlock(memory: LiveLearningMemory): string {
+  const sections: string[] = [];
+
+  sections.push('STUDENT PEDAGOGICAL MEMORY (from previous sessions):');
+
+  if (memory.generalSummary) {
+    sections.push(`- General Summary: ${memory.generalSummary}`);
+  }
+  if (memory.currentLevelEstimate) {
+    sections.push(`- Estimated Level: ${memory.currentLevelEstimate}`);
+  }
+  if (memory.preferredLanguageSupport) {
+    sections.push(`- Language Support Preference: ${memory.preferredLanguageSupport}`);
+  }
+  if (memory.recurringErrors && memory.recurringErrors.length > 0) {
+    const errorsStr = memory.recurringErrors
+      .slice(-5)
+      .map(e => `[${e.category}] ${e.description}`)
+      .join('; ');
+    sections.push(`- Recurring Errors: ${errorsStr}`);
+  }
+  if (memory.topicsMastered && memory.topicsMastered.length > 0) {
+    sections.push(`- Topics Mastered: ${memory.topicsMastered.slice(-10).join(', ')}`);
+  }
+  if (memory.learnedPhrases && memory.learnedPhrases.length > 0) {
+    sections.push(`- Learned Phrases: ${memory.learnedPhrases.slice(-10).join(', ')}`);
+  }
+  if (memory.pronunciationFocus && memory.pronunciationFocus.length > 0) {
+    sections.push(`- Pronunciation Focus: ${memory.pronunciationFocus.slice(-5).join(', ')}`);
+  }
+  if (memory.nextPedagogicalMilestone) {
+    sections.push(`- Next Milestone: ${memory.nextPedagogicalMilestone}`);
+  }
+  if (memory.nextRecommendedStep) {
+    sections.push(`- Recommended Next Step: ${memory.nextRecommendedStep}`);
+  }
+
+  sections.push('Use this memory silently to personalize the lesson. Do NOT recite it to the student.');
+
+  return '\n\n' + sections.join('\n');
+}
 
 export const chatWithLiamMultimodal = async (
   messageParts: any[],
