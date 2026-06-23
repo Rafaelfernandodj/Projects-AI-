@@ -91,7 +91,7 @@ export default function App() {
           const docSnap = await getDoc(docRef);
           
           if (docSnap.exists()) {
-            setProfile(docSnap.data() as UserProfile);
+            setProfile({ userId: session.userId, ...docSnap.data() } as UserProfile);
             console.log(`[Session] Perfil recuperado de Firestore com sucesso.`);
           } else {
             console.log(`[Session] Perfil não encontrado no banco (${session.userId}), carregando perfil básico.`);

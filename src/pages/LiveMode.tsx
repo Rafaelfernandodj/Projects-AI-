@@ -79,32 +79,7 @@ function normalizeTranscriptText(text: string): string {
 }
 
 function getSmartVisibleText(fullText: string): string {
-  const safe = normalizeTranscriptText(fullText);
-
-  if (!safe) return "";
-
-  // Se houver frase entre aspas, priorizar a última frase que o aluno deve repetir.
-  const quotedMatches = safe.match(/"([^"]+)"/g);
-
-  if (quotedMatches && quotedMatches.length) {
-    const lastQuoted = quotedMatches[quotedMatches.length - 1].replaceAll('"', "").trim();
-
-    if (lastQuoted.length <= 60) {
-      return lastQuoted;
-    }
-
-    return lastQuoted.slice(0, 60).trim() + "...";
-  }
-
-  // Caso não tenha aspas, mostrar apenas a última frase curta.
-  const sentences = safe.match(/[^.!?]+[.!?]*/g) || [safe];
-  const lastSentence = sentences[sentences.length - 1].trim();
-
-  if (lastSentence.length <= 60) {
-    return lastSentence;
-  }
-
-  return lastSentence.slice(0, 60).trim() + "...";
+  return normalizeTranscriptText(fullText);
 }
 
 function extractRepeatTarget(text: string): string {
@@ -147,6 +122,8 @@ function buildLiamStudentProfileContext(profile: any) {
     speakingConfidence: profile?.speakingConfidence || "",
     grammarBase: profile?.grammarBase || "",
     vocabularyBase: profile?.vocabularyBase || "",
+    preferredSituation: profile?.preferredSituation || profile?.onboardingAnswers?.preferredSituation || "",
+    languageProportion: profile?.languageProportion || profile?.onboardingAnswers?.languageProportion || "",
     onboardingAnswers: profile?.onboardingAnswers || {}
   };
 }
@@ -162,6 +139,8 @@ Main difficulty: ${studentProfile.mainDifficulty}
 English level: ${studentProfile.englishLevel}
 Native language: ${studentProfile.nativeLanguage}
 Speaking confidence: ${studentProfile.speakingConfidence}
+Preferred Practice Situation (Plano Ativo): ${studentProfile.preferredSituation}
+Preferred Language Proportion: ${studentProfile.languageProportion}
 Grammar base: ${studentProfile.grammarBase}
 Vocabulary base: ${studentProfile.vocabularyBase}
 
@@ -469,56 +448,31 @@ ${memorySection}
 
 Teaching rules:
 
-1. Never ask if the student wants to continue, pause, or stop.
-   The student will stop by turning off Live Mode manually.
+1. METODOLOGIA DE INÍCIO COM PLANO DE ESTUDOS:
+   - Quando o estudante iniciar o Live Mode (você receberá a primeira mensagem/boas-vindas), você DEVE se apresentar de forma amigável e descrever um plano de estudos contendo 3 situações progressivas que vocês vão cobrir hoje, com base no Preferred Practice Situation (Plano Ativo) e no Main Goal do aluno.
+   - NUNCA comece testando o aluno com perguntas do tipo "Como se diz X?". Sempre apresente o plano e a primeira situação primeiro.
 
-2. Always continue the lesson with the next useful practice step.
+2. DIDÁTICA PROGRESSIVA PASSO A PASSO (PEGAR NA MÃO DO ALUNO):
+   - Nunca faça testes ou perguntas surpresa sobre expressões que você não ensinou antes (Ex: NÃO comece perguntando "Como se diz 'eu quero um café' em inglês?" a um aluno iniciante).
+   - Siga rigorosamente este ciclo de ensino de 4 passos para qualquer expressão:
+     a) Apresentar a situação em português: Explique a situação real e dê a frase em português (ex: "Imagine que você quer pedir um café. Em português: 'Eu quero um café'.").
+     b) Fornecer a frase correspondente em inglês e a pronúncia fonética aproximada baseada no português (ex: "Em inglês falamos: 'I want a coffee', com a pronúncia aproximada: *'Ai uánt a có-fi'*.").
+     c) Pedir repetição: Solicite claramente que o aluno repita a frase em inglês (ex: "Repete comigo: 'I want a coffee'.").
+     d) Elogiar e complementar progressivamente: Assim que ele repetir corretamente, elogie brevemente e ensine imediatamente uma nova frase complementar, relevante e mais completa que use a base que ele acabou de aprender (ex: "Perfeito! Agora vamos complementar e deixar mais educado: 'Eu quero um café, por favor'. Em inglês fica: 'I want a coffee, please' - pronúncia: *'Ai uánt a có-fi, pliiz'*. Tenta repetir agora!").
+   - Vá de forma gradativa construindo o aprendizado de mãos dadas com o aluno.
 
-3. If the student is beginner, absolute beginner, has weak vocabulary, weak grammar, or fear of speaking, use mostly Portuguese for explanations.
+3. USO DE IDIOMAS (PORTUGUÊS VS INGLÊS):
+   - Se o aluno tiver nível iniciante (Survivor) ou preferir "Mais em português", use português para explicar a situação, significado e a pronúncia fonética. A frase que ele deve repetir deve ser estritamente em inglês.
+   - Mantenha a conversa viva, puxando o aluno para falar em inglês, mas dê todo o suporte necessário em português para ele não travar.
 
-4. For beginner students, teach one tiny phrase at a time.
+4. Never ask if the student wants to continue, pause, or stop. The student will stop by turning off Live Mode manually.
 
-5. Always explain the meaning of the English phrase in Portuguese.
-
-6. When asking the student to repeat, the target phrase must be in English.
-
-7. Do not overwhelm the student with grammar theory.
-
-8. Do not give long answers.
-
-9. Do not ask many questions at once.
-
-10. Use the student’s goal to choose examples.
-
-11. Use the student’s difficulty to adjust the pace.
-
-12. If the student is embarrassed or afraid to speak, be calm and encouraging.
-
-13. If the student’s goal is personal introductions, prioritize:
-- My name is...
-- I am from...
-- I live in...
-- I work with...
-- I study English.
-- I want to learn English.
-- Nice to meet you.
-- How are you?
-- I’m fine.
-- I worked today.
-
-14. If the student says they do not understand, explain in Portuguese and give one simple English phrase.
-
-15. Keep the class active until the user turns off Live Mode.
+5. Keep the class active until the user turns off Live Mode.
 
 Important Constraints (Strict):
 - You must NEVER end the lesson by yourself.
-- Never say the lesson is over.
-- Never say "that's all for today" or "por hoje é só".
-- Never tell the student to come back another day.
-- Never stop giving practice unless the user manually turns off Live Mode.
-- After each exercise, correction, or answer, continue with one short next step. Always keep the conversation alive with another small practice opportunity.
-- You must NEVER ask student whether they want to continue, stop, take a break or pause. Do not ask "Quer fazer uma pausa?", "Deseja parar?", "Quer continuar?", "Quer tentar mais uma?", "Vamos parar?", "Do you want to continue?", "Should we stop?" etc.
-- If the student seems tired, you may say: "Se quiser parar, toque no botão de desligar. Eu posso continuar praticando com você.", but do NOT ask them questions about it and do NOT end the session yourself.
+- Never say the lesson is over or "por hoje é só".
+- Never ask student whether they want to continue, stop, take a break or pause (do NOT ask "Quer fazer uma pausa?", "Deseja parar?", "Quer continuar?", "Do you want to continue?", etc.).
 - Keep every spoken response under 25 words whenever possible, keep paragraphs short, and teach one single phrase at a time.`;
 }
 
@@ -1486,6 +1440,26 @@ export default function LiveMode() {
               }
               setStatus("listening");
               console.log("[Live] Sessão live conectada");
+              
+              if (!isReconnect) {
+                currentPromise.then((session: any) => {
+                  try {
+                    session.send({
+                      clientContent: {
+                        turns: [{
+                          role: "user",
+                          parts: [{ text: "Olá Liam! Estou pronto para iniciar a aula prática do Live Mode. Por favor, apresente-se rapidamente, diga qual é o plano de estudos de hoje e quais situações vamos passar, e me ensine a primeira frase (dizendo o significado em português, a pronúncia e me pedindo para repetir em inglês)." }]
+                        }],
+                        turnComplete: true
+                      }
+                    });
+                    console.log("[Live] Prompt inicial enviado para iniciar a conversa.");
+                  } catch (err) {
+                    console.error("[Live] Erro ao enviar prompt inicial:", err);
+                  }
+                }).catch(() => {});
+              }
+
               console.log("[Live] Aguardando fala do aluno");
               
               reconnectAttemptsRef.current = 0; // reset on success
@@ -1595,6 +1569,13 @@ export default function LiveMode() {
                 // Save output transcription text if provided
                 const partialText = String(serverContent?.outputTranscription?.text || "").trim();
                 if (partialText) {
+                  // A transcrição do áudio do modelo começou a chegar. Limpar spinner de pensamento e timeout.
+                  if (responseTimeoutRef.current) {
+                    clearTimeout(responseTimeoutRef.current);
+                    responseTimeoutRef.current = null;
+                  }
+                  setIsThinking(false);
+
                   const rawAppended1 = normalizeTranscriptText(
                     currentTurnFullTextRef.current + " " + partialText
                   );
