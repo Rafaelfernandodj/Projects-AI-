@@ -1,6 +1,16 @@
 import { create } from 'zustand';
 import { User as FirebaseUser } from 'firebase/auth';
 
+export interface CustomPlan {
+  id: string;
+  title: string;
+  description: string;
+  scenario: string;
+  languagePreference: "portuguese" | "mixed" | "english";
+  instructions: string;
+  createdAt: number;
+}
+
 export type UserLevel = 'Survivor' | 'Speaker' | 'Fluent' | 'Unassigned';
 
 export interface UserProfile {
@@ -41,16 +51,20 @@ interface AppState {
   user: FirebaseUser | null;
   profile: UserProfile | null;
   loading: boolean;
+  activePlan: CustomPlan | null;
   setUser: (user: FirebaseUser | null) => void;
   setProfile: (profile: UserProfile | null) => void;
   setLoading: (loading: boolean) => void;
+  setActivePlan: (plan: CustomPlan | null) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
   user: null,
   profile: null,
   loading: true,
+  activePlan: null,
   setUser: (user) => set({ user }),
   setProfile: (profile) => set({ profile }),
   setLoading: (loading) => set({ loading }),
+  setActivePlan: (activePlan) => set({ activePlan }),
 }));
