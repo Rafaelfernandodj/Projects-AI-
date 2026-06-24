@@ -47,6 +47,7 @@ function float32ToInt16(float32Array: Float32Array): Int16Array {
 export default function LiveMode() {
   const { profile, user, activePlan } = useStore();
   const [isPlansOpen, setIsPlansOpen] = useState(false);
+  const [speed, setSpeed] = useState(1.0);
   
   // liveSessionState
   const [status, setStatus] = useState<
@@ -459,6 +460,7 @@ export default function LiveMode() {
 
               const pSource = audioContextRef.current.createBufferSource();
               pSource.buffer = audioBuffer;
+              pSource.playbackRate.value = speed; // Apply speed setting
               pSource.connect(audioContextRef.current.destination);
 
               const currentTime = audioContextRef.current.currentTime;
@@ -467,7 +469,7 @@ export default function LiveMode() {
               }
 
               pSource.start(nextPlaybackTimeRef.current);
-              nextPlaybackTimeRef.current += audioBuffer.duration;
+              nextPlaybackTimeRef.current += (audioBuffer.duration / speed); // Adjust timing based on playback speed
 
               pSource.onended = () => {
                 if (!isIntentionalStopRef.current && audioContextRef.current &&
@@ -593,20 +595,30 @@ export default function LiveMode() {
             </div>
           </div>
 
-          <button
-            onClick={() => setIsPlansOpen(true)}
-            disabled={status !== "idle"}
-            className={`px-3 py-1.5 border rounded-xl font-bold flex items-center gap-2 transition-all text-xs sm:text-sm shrink-0 ${
-              status !== "idle"
-                ? "bg-gray-800/50 border-gray-700/50 text-gray-600 cursor-not-allowed opacity-50"
-                : "bg-brand-dark border-brand-green/30 text-brand-green-glow hover:bg-brand-green/10"
-            }`}
-          >
-            <BookOpen size={15} /> 
-            <span className="max-w-[125px] truncate font-sans">
-              {activePlan ? activePlan.title : "Planos"}
-            </span>
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setSpeed(prev => prev === 0.8 ? 1.0 : prev === 1.0 ? 1.2 : 0.8)}
+              className="px-2.5 py-1.5 border border-brand-green/20 bg-brand-dark rounded-xl text-xs font-bold text-brand-green-glow hover:bg-brand-green/10 transition-all cursor-pointer"
+              title="Ajustar velocidade da voz do Liam"
+            >
+              ⚡ {speed === 0.8 ? "0.8x (Devagar)" : speed === 1.2 ? "1.2x (Rápido)" : "1.0x (Normal)"}
+            </button>
+
+            <button
+              onClick={() => setIsPlansOpen(true)}
+              disabled={status !== "idle"}
+              className={`px-3 py-1.5 border rounded-xl font-bold flex items-center gap-2 transition-all text-xs sm:text-sm shrink-0 ${
+                status !== "idle"
+                  ? "bg-gray-800/50 border-gray-700/50 text-gray-600 cursor-not-allowed opacity-50"
+                  : "bg-brand-dark border-brand-green/30 text-brand-green-glow hover:bg-brand-green/10"
+              }`}
+            >
+              <BookOpen size={15} /> 
+              <span className="max-w-[125px] truncate font-sans">
+                {activePlan ? activePlan.title : "Planos"}
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Center Canvas / Text */}
