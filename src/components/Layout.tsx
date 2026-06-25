@@ -49,6 +49,7 @@ export default function Layout() {
 
   const navItems = [
     { name: 'Home', path: '/', icon: <LayoutDashboard size={20} /> },
+    { name: 'Chat', path: '/chat', icon: <MessageCircle size={20} /> },
     { name: 'Live', path: '/live', icon: <Mic size={20} /> },
     { name: 'Rank', path: '/leaderboard', icon: <Trophy size={20} /> },
     { name: 'Perfil', path: '/profile', icon: <User size={20} /> },

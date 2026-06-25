@@ -48,6 +48,11 @@ export default function LiveMode() {
   const { profile, user, activePlan } = useStore();
   const [isPlansOpen, setIsPlansOpen] = useState(false);
   const [speed, setSpeed] = useState(1.0);
+  const speedRef = useRef(1.0);
+
+  useEffect(() => {
+    speedRef.current = speed;
+  }, [speed]);
   
   // liveSessionState
   const [status, setStatus] = useState<
@@ -460,7 +465,7 @@ export default function LiveMode() {
 
               const pSource = audioContextRef.current.createBufferSource();
               pSource.buffer = audioBuffer;
-              pSource.playbackRate.value = speed; // Apply speed setting
+              pSource.playbackRate.value = speedRef.current;
               pSource.connect(audioContextRef.current.destination);
 
               const currentTime = audioContextRef.current.currentTime;
@@ -469,7 +474,7 @@ export default function LiveMode() {
               }
 
               pSource.start(nextPlaybackTimeRef.current);
-              nextPlaybackTimeRef.current += (audioBuffer.duration / speed); // Adjust timing based on playback speed
+              nextPlaybackTimeRef.current += (audioBuffer.duration / speedRef.current);
 
               pSource.onended = () => {
                 if (!isIntentionalStopRef.current && audioContextRef.current &&
@@ -603,7 +608,6 @@ export default function LiveMode() {
             >
               ⚡ {speed === 0.8 ? "0.8x (Devagar)" : speed === 1.2 ? "1.2x (Rápido)" : "1.0x (Normal)"}
             </button>
-
             <button
               onClick={() => setIsPlansOpen(true)}
               disabled={status !== "idle"}

@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, browserLocalPersistence, indexedDBLocalPersistence, setPersistence } from 'firebase/auth';
-import { getFirestore, enableMultiTabIndexedDbPersistence, enableIndexedDbPersistence } from 'firebase/firestore';
+import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import firebaseConfig from '../../firebase-applet-config.json';
 import { Capacitor } from '@capacitor/core';
@@ -17,18 +17,11 @@ setPersistence(auth, persistenceType).catch((error) => {
   console.error("Auth persistence error:", error);
 });
 
-// Enable Firestore persistence
+// Enable Firestore persistence only when running natively as a mobile app (Capacitor),
+// where offline functionality is premium/expected and lock contention from HMR/iframes doesn't happen.
 if (Capacitor.isNativePlatform()) {
   enableIndexedDbPersistence(db).catch((err) => {
      console.warn("Native IndexedDB persistence error:", err);
-  });
-} else {
-  enableMultiTabIndexedDbPersistence(db).catch((err) => {
-    if (err.code == 'failed-precondition') {
-      console.warn("Multiple tabs open, persistence can only be enabled in one tab at a a time.");
-    } else if (err.code == 'unimplemented') {
-      console.warn("The current browser does not support all of the features required to enable persistence.");
-    }
   });
 }
 

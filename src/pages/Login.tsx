@@ -104,7 +104,7 @@ export default function Login() {
         
         // Update Zustand store
         setUser({ uid: session.userId, email: cleanEmail } as any);
-        setProfile(userData);
+        setProfile({ userId: session.userId, ...userData } as any);
 
         // Check onboarding completion
         if (userData.level && userData.level !== 'Unassigned') {

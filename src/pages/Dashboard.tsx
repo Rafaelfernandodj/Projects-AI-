@@ -1,13 +1,15 @@
 import { useStore } from '../store/useStore';
-import { Flame, Trophy, Route, Clock, ChevronRight, Download, MousePointer2 } from 'lucide-react';
+import { Flame, Trophy, Route, Clock, ChevronRight, Download, MousePointer2, BookOpen } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 import { useState } from 'react';
+import PlansModal from '../components/PlansModal';
 
 export default function Dashboard() {
   const { profile } = useStore();
   const { isInstallable, isInstalled, installPWA, isIOS } = usePWAInstall();
   const [showIosTip, setShowIosTip] = useState(false);
+  const [isPlansOpen, setIsPlansOpen] = useState(false);
   const isInIframe = window.self !== window.top;
 
   // Check if it's Safari on iOS
@@ -159,17 +161,23 @@ service cloud.firestore {
           <Trophy size={200} />
         </div>
         <div className="relative z-10">
-          <div className="text-brand-green uppercase tracking-wider text-sm font-semibold mb-1">Your Level</div>
+          <div className="text-brand-green uppercase tracking-wider text-sm font-semibold mb-1">Seu Nível</div>
           <h2 className="text-4xl font-black mb-4 text-brand-text">{profile.level}</h2>
           <p className="text-gray-300 max-w-sm mb-6">
-            {profile.level === 'Survivor' && "We're going to break the fear of speaking. Let's communicate in real-life contexts."}
-            {profile.level === 'Speaker' && "You're doing great! Our focus now is correcting nuances and gaining fluency."}
-            {profile.level === 'Fluent' && "Time to refine! We'll use 100% English with complex real-world situations."}
+            {profile.level === 'Survivor' && "Vamos quebrar o medo de falar. Vamos nos comunicar em cenários reais do dia a dia."}
+            {profile.level === 'Speaker' && "Você está indo super bem! Nosso foco agora é ajustar pequenos destalhes e ganhar fluência."}
+            {profile.level === 'Fluent' && "Hora de refinar! Praticaremos 100% em inglês com dinâmicas e situações complexas do mundo real."}
           </p>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <Link to="/live" className="bg-brand-green-glow text-brand-dark px-6 py-2.5 rounded-xl font-bold hover:brightness-110 transition flex items-center gap-2">
-              Start Live <ChevronRight size={18} />
+              Começar Live <ChevronRight size={18} />
             </Link>
+            <button
+              onClick={() => setIsPlansOpen(true)}
+              className="bg-brand-dark border border-brand-green/30 text-brand-green-glow px-5 py-2.5 rounded-xl font-bold hover:bg-brand-green/10 transition flex items-center gap-2"
+            >
+              <BookOpen size={18} /> Planos de Estudo
+            </button>
           </div>
         </div>
       </div>
@@ -226,6 +234,7 @@ service cloud.firestore {
         </div>
       </div>
 
+      <PlansModal isOpen={isPlansOpen} onClose={() => setIsPlansOpen(false)} />
     </div>
   );
 }

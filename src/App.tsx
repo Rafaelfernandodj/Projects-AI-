@@ -11,6 +11,7 @@ import Onboarding from './pages/Onboarding';
 import LiveMode from './pages/LiveMode';
 import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
+import Chat from './pages/Chat';
 import Layout from './components/Layout';
 
 export default function App() {
@@ -145,6 +146,7 @@ export default function App() {
         
         <Route element={user ? <Layout /> : <Navigate to="/login" />}>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/chat" element={<Chat />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/live" element={<LiveMode />} />
           <Route path="/leaderboard" element={<Leaderboard />} />

@@ -56,94 +56,6 @@
         "earnedAt": { "type": "integer" }
       },
       "required": ["medalId", "earnedAt"]
-    },
-    "LiveSession": {
-      "title": "LiveSession",
-      "description": "A record of an individual live session",
-      "type": "object",
-      "properties": {
-        "sessionId": { "type": "string" },
-        "userId": { "type": "string" },
-        "startedAt": { "type": "integer" },
-        "endedAt": { "type": "integer" },
-        "durationSeconds": { "type": "integer" },
-        "status": { "type": "string", "enum": ["completed", "disconnected", "failed"] },
-        "topicPracticed": { "type": "string" },
-        "dialogueSnippet": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "role": { "type": "string", "enum": ["user", "model"] },
-              "text": { "type": "string" }
-            },
-            "required": ["role", "text"]
-          }
-        },
-        "learnedPhrases": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "errorsDetected": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "category": { "type": "string", "enum": ["grammar", "pronunciation", "vocabulary"] },
-              "description": { "type": "string" }
-            },
-            "required": ["category", "description"]
-          }
-        },
-        "corrections": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "sessionSummary": { "type": "string" },
-        "nextStep": { "type": "string" },
-        "createdAt": { "type": "integer" },
-        "updatedAt": { "type": "integer" }
-      },
-      "required": ["sessionId", "userId", "startedAt", "endedAt", "durationSeconds", "status", "createdAt", "updatedAt"]
-    },
-    "LiveLearningMemory": {
-      "title": "LiveLearningMemory",
-      "description": "Consolidated long-term pedagogical memory of the student for AI system instructions",
-      "type": "object",
-      "properties": {
-        "lastUpdated": { "type": "integer" },
-        "totalLiveSessions": { "type": "integer" },
-        "generalSummary": { "type": "string" },
-        "currentLevelEstimate": { "type": "string", "enum": ["Survivor", "Speaker", "Fluent", "Unassigned"] },
-        "preferredLanguageSupport": { "type": "string" },
-        "recurringErrors": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "category": { "type": "string", "enum": ["grammar", "pronunciation", "vocabulary"] },
-              "description": { "type": "string" },
-              "lastSeen": { "type": "integer" }
-            },
-            "required": ["category", "description", "lastSeen"]
-          }
-        },
-        "topicsMastered": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "learnedPhrases": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "pronunciationFocus": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "nextPedagogicalMilestone": { "type": "string" },
-        "nextRecommendedStep": { "type": "string" }
-      },
-      "required": ["lastUpdated", "totalLiveSessions", "generalSummary", "currentLevelEstimate", "recurringErrors"]
     }
   },
   "firestore": {
@@ -162,14 +74,6 @@
     "/users/{userId}/medals/{medalId}": {
       "schema": { "$ref": "#/entities/Medal" },
       "description": "Medals earned by a user"
-    },
-    "/users/{userId}/liveSessions/{sessionId}": {
-      "schema": { "$ref": "#/entities/LiveSession" },
-      "description": "Historical log of individual live voice sessions"
-    },
-    "/users/{userId}/memory/liveLearningMemory": {
-      "schema": { "$ref": "#/entities/LiveLearningMemory" },
-      "description": "Consolidated pedagogical memory of the student for AI system instructions"
     }
   }
 }
